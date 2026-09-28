@@ -1,4 +1,14 @@
 <!DOCTYPE html>
+<!-- build:1790599921 -->
+<!-- oldbuild:1790599913 -->
+<!-- oldbuild:1790599904 -->
+<!-- oldbuild:1790597902 -->
+<!-- oldbuild:1790597757 -->
+<!-- oldbuild:1790597634 -->
+<!-- oldbuild:1790590138 -->
+<!-- oldbuild:1790589573 -->
+<!-- oldbuild:1790589561 -->
+<!-- oldbuild:1790579860 -->
 <!-- v1790576660 -->
 <html lang="tr">
 <head>
@@ -85,12 +95,7 @@ function opPdfIndir(){
     +'td{padding:4px;border-bottom:1px solid #e2e8f0;font-size:8px;vertical-align:top;}'
     +'tr:nth-child(even) td{background:#f8fafc;}'
     +'@media print{@page{size:A4 landscape;margin:8mm;}}'
-    +'</style><script>
-var opUcretGorunsun=false;
-function normGuz(s){if(!s)return '-';return s.replace(/ISTANBUL HAVAALANI/gi,'IST').replace(/İSTANBUL HAVAALANI/gi,'IST').replace(/SABİHA GÖKÇEN HAVAALANI/gi,'SAW').replace(/SABİHA GOKCEN HAVAALANI/gi,'SAW');}
-function formatTarih(t){if(!t||t==='-')return '-';var p=String(t).split('-');if(p.length===3)return p[2]+'.'+p[1]+'.'+p[0];return t;}
-</script>
-</head><body>'
+    +'</style></head><body>'
     +'<h2>HerTransfer &mdash; Operasyon Listesi &nbsp; <span style="font-size:10px;color:#64748b;">'+new Date().toLocaleDateString('tr-TR')+'</span></h2>'
     +'<table><thead><tr>'
     +'<th>Durum</th><th>Tarih</th><th>Saat</th><th>Müşteri</th><th>İş Tipi</th><th>Güzergah / Açıklama</th><th>Uçuş K.</th><th>Araç Tipi</th><th>Plaka</th><th>Kaptan</th><th>Takas</th><th>T.Tutar</th><th>Ücret</th>'
@@ -120,15 +125,21 @@ function formatTarih(t){if(!t||t==='-')return '-';var p=String(t).split('-');if(
   });
   html+='</tbody></table>'
     +'<div style="margin-top:8px;color:#94a3b8;font-size:7px;">Toplam '+list.length+' operasyon &nbsp;&bull;&nbsp; HerTransfer Panel</div>'
-    +'<script>
+    +'<script>wfunction normGuz(s){
+  if(!s)return s||'-';
+  return s.replace(/ISTANBUL HAVAALANI/gi,'IST').replace(/İSTANBUL HAVAALANI/gi,'IST').replace(/ISTANBUL HAVALIMANI/gi,'IST').replace(/İSTANBUL HAVALIMANI/gi,'IST').replace(/SABİHA GÖKÇEN HAVAALANI/gi,'SAW').replace(/SABİHA GOKCEN HAVAALANI/gi,'SAW').replace(/SABİHA GÖKÇEN HAVALIMANI/gi,'SAW');
+}
+function formatTarih(t){
+  if(!t||t==='-')return '-';
+  var p=String(t).split('-');
+  if(p.length===3)return p[2]+'.'+p[1]+'.'+p[0];
+  return t;
+}
 indow.onload=function(){window.print();}<\/script>'
     +'</body></html>';
-  var blob=new Blob([html],{type:'text/html'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url;a.download='HerTransfer_'+new Date().toISOString().slice(0,10)+'.html';
-  a.click();URL.revokeObjectURL(url);
-  toast('PDF dosyası indirildi, tarayıcıda açıp yazdırın','ok');
+  var w=window.open('','_blank');
+  w.document.write(html);
+  w.document.close();
 }
 
 function opPaylasım(id){
@@ -201,6 +212,7 @@ async function opSecilenleriDurumDegistir(){
 }
 
 
+var opUcretGorunsun=false;
 function opUcretToggle(){
   opUcretGorunsun=!opUcretGorunsun;
   var btn=document.getElementById('ucretToggleBtn');
@@ -547,7 +559,7 @@ input::placeholder{color:var(--t4);}
           <button class="btn btnp btnsm" onclick="navYeni()">+ Yeni Operasyon</button>
           <button class="btn btnsm" onclick="opExcelIndir()" style="background:#16a34a;color:#fff;border:none;padding:6px 14px;border-radius:7px;font-weight:600;cursor:pointer;font-size:13px;">&#128202; Excel</button>
           <button class="btn btnsm" onclick="opPdfIndir()" style="background:#dc2626;color:#fff;border:none;padding:6px 14px;border-radius:7px;font-weight:600;cursor:pointer;font-size:13px;">&#128196; PDF</button>
-
+          <button id="ucretToggleBtn" class="btn btnsm" onclick="opUcretToggle()" style="background:#7c3aed;color:#fff;border:none;padding:6px 14px;border-radius:7px;font-weight:600;cursor:pointer;font-size:13px;">&#128176; Ücret</button>
         </div>
         <input type="text" id="oSrc" placeholder="&#128269; Ara..." style="width:200px;" oninput="renderOps()">
       </div>
@@ -612,7 +624,7 @@ input::placeholder{color:var(--t4);}
                 <th style="padding:7px 8px;color:#fff;font-size:11px;font-weight:700;text-align:left;">ARAÇ TİPİ</th>
                 <th style="padding:7px 8px;color:#fff;font-size:11px;font-weight:700;text-align:left;">PLAKA / KAPTAN</th>
                 <th style="padding:7px 8px;color:#fff;font-size:11px;font-weight:700;text-align:left;">TAKAS</th>
-                <th style="padding:7px 8px;color:#fff;font-size:11px;font-weight:700;text-align:left;cursor:pointer;" onclick="opUcretToggle()">ÜCRET 👁</th>
+                <th style="padding:7px 8px;color:#fff;font-size:11px;font-weight:700;text-align:left;">ÜCRET</th>
                 <th style="padding:7px 8px;"></th>
               </tr>
             </thead>
@@ -1153,7 +1165,7 @@ function renderOps(){
   var df=gv('oFD');var af=gv('oFA');
   var ft1=gv('oFT1');var ft2=gv('oFT2');
   var fm=gv('oFM');var fit=gv('oFIT');var fat=gv('oFAT');
-  var list=OP.slice().sort(function(a,b){var ta=a.bas_tarih||'0000';var tb=b.bas_tarih||'0000';return ta>tb?-1:ta<tb?1:0;}).filter(function(o){
+  var list=OP.slice().sort(function(a,b){var ta=a.bas_tarih||'9999';var tb=b.bas_tarih||'9999';return ta>tb?1:ta<tb?-1:0;}).filter(function(o){
     var m=MS.find(function(x){return x.id===o.musteri_id;});
     var mA=m?m.ad.toLowerCase():'';
     var g=((o.bas_yer||'')+(o.bit_yer||'')).toLowerCase();
