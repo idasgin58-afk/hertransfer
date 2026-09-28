@@ -1343,7 +1343,12 @@ async function opDuz(id){
   navYeni();
   setTimeout(async function(){
     ppDD();
-    sv('opM',op.musteri_id);sv('opRef',op.referans);sv('opTur',op.tur);sv('opAd',op.ad);sv('opKod',op.kod);sv('opDur',op.durum);
+    sv('opM',op.musteri_id);sv('opRef',op.referans);sv('opAd',op.ad);sv('opKod',op.kod);sv('opDur',op.durum);
+    // İş tipini normalize ederek set et
+    var turNorm=op.tur||'';
+    if(turNorm==='Gelis'||turNorm==='GL')turNorm='Geliş';
+    else if(turNorm==='Gidis'||turNorm==='GD')turNorm='Gidiş';
+    sv('opTur',turNorm);
     sv('opBT',op.bas_tarih);sv('opBS',op.bas_saat);sv('opBY',op.bas_yer);
     sv('opVT',op.bit_tarih);sv('opVS',op.bit_saat);sv('opVY',op.bit_yer);
     sv('opFiyat',op.fiyat);sv('opPara',op.para_birimi);sv('opMal',op.taseron_maliyeti);
@@ -1351,9 +1356,14 @@ async function opDuz(id){
     sv('opTer',op.terminal);sv('opKars',op.karsilama);sv('opBul',op.bulusma);
     sv('opNot',op.notlar);sv('opSNot',op.surucu_notu);
     if(op.arac_tip){
+      var atFound=false;
       document.querySelectorAll('.atk').forEach(function(k){
-        if(k.querySelector('.atkt')&&k.querySelector('.atkt').textContent===op.arac_tip){secAT(op.arac_tip,k);}
+        var txt=k.querySelector('.atkt');
+        if(txt&&txt.textContent.trim().toLowerCase()===op.arac_tip.trim().toLowerCase()){
+          secAT(txt.textContent.trim(),k);atFound=true;
+        }
       });
+      if(!atFound)selAT=op.arac_tip;
     }
     var yr=await sc.from('yolcular').select('*').eq('operasyon_id',id);
     YL=yr.data||[];renderYolcular();kontrolGecmis();
