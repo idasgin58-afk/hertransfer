@@ -126,7 +126,7 @@ function opPaylasım(id){
   if(o.taseron_maliyeti){var t2=TS.find(function(x){return x.id===o.taseron_id;});metin+='💰 Takas Tutarı: '+fmt(o.taseron_maliyeti)+(t2?' ('+t2.ad+')':'')+'\n';}
   metin+='━━━━━━━━━━━━━━━━';
   navigator.clipboard.writeText(metin).then(function(){
-    toast('İş bilgisi kopyalandı! WhatsApp'a yapıştırabilirsiniz.','ok');
+    toast('Is bilgisi kopyalandi! WhatsApp a yapistirabilirsiniz.','ok');
   }).catch(function(){
     var ta=document.createElement('textarea');
     ta.value=metin;document.body.appendChild(ta);ta.select();
