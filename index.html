@@ -71,7 +71,13 @@ function opExcelIndir(){
   ws['!pageSetup'].orientation='landscape';
   var wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'Operasyonlar');
-  XLSX.writeFile(wb,'HerTransfer_Operasyonlar_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  var wbout=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+  var blob=new Blob([wbout],{type:'application/octet-stream'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;
+  a.download='HerTransfer_'+new Date().toISOString().slice(0,10)+'.xlsx';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
   toast('Excel indirildi!','ok');
 }
 
@@ -127,12 +133,12 @@ function opPaylasım(id){
   if(o.taseron_maliyeti){var t2=TS.find(function(x){return x.id===o.taseron_id;});metin+='💰 Takas Tutarı: '+fmt(o.taseron_maliyeti)+(t2?' ('+t2.ad+')':'')+'\n';}
   metin+='━━━━━━━━━━━━━━━━';
   navigator.clipboard.writeText(metin).then(function(){
-    toast('İş bilgisi kopyalandı! WhatsApp'a yapıştırabilirsiniz.','ok');
+    toast('Is bilgisi kopyalandi! WhatsApp a yapistirabilirsiniz.','ok');
   }).catch(function(){
     var ta=document.createElement('textarea');
     ta.value=metin;document.body.appendChild(ta);ta.select();
     document.execCommand('copy');document.body.removeChild(ta);
-    toast('Kopyalandı!','ok');
+    toast('Kopyalandi!','ok');
   });
 }
 
@@ -171,6 +177,7 @@ function opUcretToggle(){
   opUcretGorunsun=!opUcretGorunsun;
   var ikon=document.getElementById('ucretGozIkon');
   if(ikon)ikon.textContent=opUcretGorunsun?'🙈':'👁';
+  renderOps();renderDash();
   renderOps();renderDash();
 }
 
