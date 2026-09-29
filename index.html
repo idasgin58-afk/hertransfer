@@ -2149,7 +2149,7 @@ async function hzKaydet(){
     bas_tarih:d.tarih||null,bas_saat:d.saat||null,
     bas_yer:d.nereden||null,bit_yer:d.nereye||null,
     ucus_kodu:d.ucus_kodu||null,ucus_saati:d.ucus_saati||null,
-    referans:d.pax?d.pax+' kisi':null,notlar:(d.arac_tipi?'Arac: '+d.arac_tipi+'. ':'')+( d.notlar||'')||null
+    referans:d.pax?d.pax+' kisi':null,arac_tip:d.arac_tipi||null,notlar:d.notlar||null
   }).select().single();
   if(r.error){toast('Kayit hatasi: '+r.error.message,'err');hzAdim3Goster();return;}
   if(d.yolcular&&d.yolcular.length){
