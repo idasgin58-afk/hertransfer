@@ -531,7 +531,7 @@ input::placeholder{color:var(--t4);}
             <thead>
               <tr style="background:#f1f5f9;border-bottom:2px solid var(--bd);">
                 <th style="padding:6px 8px;width:36px;"><input type="checkbox" id="chkAll" onclick="opHepsiniSec(this)"></th>
-                <th style="padding:6px 8px;min-width:110px;">
+                <th style="padding:6px 8px;min-width:100px;">
                   <select id="oFD" onchange="renderOps()" style="width:100%;font-size:12px;border:1px solid var(--bd);border-radius:5px;padding:4px 6px;background:#fff;">
                     <option value="">Tüm Durumlar</option>
                     <option>Talep</option><option>Rezervasyon</option><option>Yola Çıktı</option><option>Tamamlandı</option><option>İptal</option>
@@ -1130,7 +1130,11 @@ function renderOps(){
   var df=gv('oFD');var af=gv('oFA');
   var ft1=gv('oFT1');var ft2=gv('oFT2');
   var fm=gv('oFM');var fit=gv('oFIT');var fat=gv('oFAT');
-  var list=OP.slice().sort(function(a,b){var ta=a.bas_tarih||'0000';var tb=b.bas_tarih||'0000';return ta>tb?-1:ta<tb?1:0;}).filter(function(o){
+  var list=OP.slice().sort(function(a,b){
+    var ta=(a.bas_tarih||'0000')+'T'+(a.bas_saat||'00:00');
+    var tb=(b.bas_tarih||'0000')+'T'+(b.bas_saat||'00:00');
+    return ta>tb?-1:ta<tb?1:0;
+  }).filter(function(o){
     var m=MS.find(function(x){return x.id===o.musteri_id;});
     var mA=m?m.ad.toLowerCase():'';
     var g=((o.bas_yer||'')+(o.bit_yer||'')).toLowerCase();
@@ -1196,7 +1200,7 @@ function renderOps(){
       '<td style="color:var(--t3);white-space:nowrap;">'+(o.bas_saat?o.bas_saat.slice(0,5):'-')+'</td>'+
       '<td><div class="pc">'+(m?m.ad:'?')+'</div></td>'+
       '<td style="white-space:nowrap;">'+isTipi+'</td>'+
-      '<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+g+'">'+g+'</td>'+
+      '<td style="max-width:160px;word-break:break-word;font-size:11px;line-height:1.4;" title="'+g+'">'+g+'</td>'+
       '<td>'+(o.ucus_kodu?'<div class="sc2" style="color:var(--pr);">'+o.ucus_kodu+'</div>':'<span style="color:var(--t4);">-</span>')+'</td>'+
       '<td>'+(o.arac_tip?'<div class="pc">'+o.arac_tip+'</div>':'<span style="color:var(--t4);">-</span>')+'</td>'+
       '<td>'+aracHtml+kaptanHtml+'</td>'+
@@ -1925,10 +1929,13 @@ function toggleGelisAlanlari() {
 }
 
 function opKoduOlustur() {
-  var yil = new Date().getFullYear().toString().slice(2);
-  var sayi = OP.length + 1;
-  var kod = 'HT' + yil + String(sayi).padStart(4, '0');
-  return kod;
+  var bugun = new Date();
+  var yy = bugun.getFullYear().toString().slice(2);
+  var mm = (bugun.getMonth()+1).toString().padStart(2,'0');
+  var dd = bugun.getDate().toString().padStart(2,'0');
+  var bugunStr = bugun.getFullYear()+'-'+mm+'-'+dd;
+  var bugunSayi = OP.filter(function(o){return o.bas_tarih===bugunStr;}).length + 1;
+  return yy+mm+dd+'-'+String(bugunSayi).padStart(2,'0');
 }
 
 // Müşteri raporu modal
@@ -2142,7 +2149,7 @@ async function hzKaydet(){
   if(!d||!m){toast('Hata!','err');return;}
   hzGizleHepsi();document.getElementById('hzLoading').style.display='';
   document.getElementById('hzLoadText').textContent='Kaydediliyor...';
-  var kod='HT'+new Date().getFullYear().toString().slice(2)+'-'+Date.now().toString().slice(-4);
+  var kod=opKoduOlustur();
   var tur=d.is_tipi==='GL'?'Gelis':d.is_tipi==='GD'?'Gidis':'Tahsis';
   var r=await sc.from('operasyonlar').insert({
     musteri_id:m.id,durum:'Rezervasyon',tur:tur,kod:kod,
@@ -2277,7 +2284,7 @@ async function exKaydet(){
     var aciklama=String(r['AÇIKLAMA']||r['ACIKLAMA']||'').trim()||null;
     var guz=exNeredenNereye(aciklama);
     var tur=isTipi==='GL'?'Geliş':isTipi==='GD'?'Gidiş':'Tahsis';
-    var kod='HT26-'+String(Date.now()).slice(-4);
+    var kod=opKoduOlustur();
     if(!musteriId&&musteriAd){
       var nr=await sc.from('musteriler').insert({ad:musteriAd,tip:'Acente'}).select().single();
       if(!nr.error){musteriId=nr.data.id;await lM();}
