@@ -574,18 +574,18 @@ input::placeholder{color:var(--t4);}
                 <th style="padding:6px 8px;min-width:80px;color:var(--t3);font-size:11px;font-weight:600;">ÜCRET</th>
                 <th style="padding:6px 8px;min-width:60px;"></th>
               </tr>
-              <tr style="background:#1f3864;">
-                <th style="padding:7px 8px;width:36px;"></th><th style="padding:7px 8px;color:#fff;font-size:11px;font-weight:700;text-align:left;">DURUM</th>
-                <th style="padding:7px 8px;color:#fff;font-size:11px;font-weight:700;text-align:left;">TARİH</th>
-                <th style="padding:7px 8px;color:#fff;font-size:11px;font-weight:700;text-align:left;">SAAT</th>
-                <th style="padding:7px 8px;color:#fff;font-size:11px;font-weight:700;text-align:left;">MÜŞTERİ</th>
-                <th style="padding:7px 8px;color:#fff;font-size:11px;font-weight:700;text-align:left;">İŞ TİPİ</th>
-                <th style="padding:7px 8px;color:#fff;font-size:11px;font-weight:700;text-align:left;">GÜZERGAH / AÇIKLAMA</th>
-                <th style="padding:7px 8px;color:#fff;font-size:11px;font-weight:700;text-align:left;">UÇUŞ K.</th>
-                <th style="padding:7px 8px;color:#fff;font-size:11px;font-weight:700;text-align:left;">ARAÇ TİPİ</th>
-                <th style="padding:7px 8px;color:#fff;font-size:11px;font-weight:700;text-align:left;">PLAKA / KAPTAN</th>
-                <th style="padding:7px 8px;color:#fff;font-size:11px;font-weight:700;text-align:left;">TAKAS</th>
-                <th style="padding:7px 8px;color:#fff;font-size:11px;font-weight:700;text-align:left;cursor:pointer;" onclick="opUcretToggle()">ÜCRET 👁</th>
+              <tr style="background:#e2e8f0;">
+                <th style="padding:7px 8px;width:36px;"></th><th style="padding:7px 8px;color:#1e293b;font-size:11px;font-weight:700;text-align:left;">DURUM</th>
+                <th style="padding:7px 8px;color:#1e293b;font-size:11px;font-weight:700;text-align:left;">TARİH</th>
+                <th style="padding:7px 8px;color:#1e293b;font-size:11px;font-weight:700;text-align:left;">SAAT</th>
+                <th style="padding:7px 8px;color:#1e293b;font-size:11px;font-weight:700;text-align:left;">MÜŞTERİ</th>
+                <th style="padding:7px 8px;color:#1e293b;font-size:11px;font-weight:700;text-align:left;">İŞ TİPİ</th>
+                <th style="padding:7px 8px;color:#1e293b;font-size:11px;font-weight:700;text-align:left;">GÜZERGAH / AÇIKLAMA</th>
+                <th style="padding:7px 8px;color:#1e293b;font-size:11px;font-weight:700;text-align:left;">UÇUŞ K.</th>
+                <th style="padding:7px 8px;color:#1e293b;font-size:11px;font-weight:700;text-align:left;">ARAÇ TİPİ</th>
+                <th style="padding:7px 8px;color:#1e293b;font-size:11px;font-weight:700;text-align:left;">PLAKA / KAPTAN</th>
+                <th style="padding:7px 8px;color:#1e293b;font-size:11px;font-weight:700;text-align:left;">TAKAS</th>
+                <th style="padding:7px 8px;color:#1e293b;font-size:11px;font-weight:700;text-align:left;cursor:pointer;" onclick="opUcretToggle()">ÜCRET 👁</th>
                 <th style="padding:7px 8px;"></th>
               </tr>
             </thead>
@@ -771,9 +771,9 @@ input::placeholder{color:var(--t4);}
 <div class="mo" id="mo-takas_firma"><div class="modal"><div class="mh"><div class="mt2">Takas Firması Ekle</div><button class="mc2" onclick="cM('takas_firma')">&#10005;</button></div>
 <div class="mb"><div class="fg">
   <div class="fgrp ff"><label>Ad / Firma <span class="req">*</span></label><input type="text" id="tAd"></div>
-  <div class="fgrp"><label>Telefon</label><input type="text" id="tTel"></div>
+  <div class="fgrp"><label>Yetkili Kişi</label><input type="text" id="tYetkili" placeholder="Ad Soyad"></div>
+  <div class="fgrp"><label>Telefon <span class="req">*</span></label><input type="text" id="tTel" placeholder="+90 5xx xxx xx xx"></div>
   <div class="fgrp"><label>E-posta</label><input type="email" id="tEmail"></div>
-  <div class="fgrp"><label>Araç Bilgisi</label><input type="text" id="tArac" placeholder="34 ABC 123"></div>
   <div class="fgrp"><label>Ödeme Şekli</label><select id="tOd"><option>Her iş sonrası</option><option>Haftalık</option><option>Aylık</option></select></div>
   <div class="fgrp ff"><label>Not</label><textarea id="tNot" rows="2"></textarea></div>
 </div></div>
@@ -783,7 +783,7 @@ input::placeholder{color:var(--t4);}
 <div class="mb"><div class="fg">
   <div class="fgrp"><label>Marka / Model <span class="req">*</span></label><input type="text" id="aModel" placeholder="Mercedes Sprinter 319"></div>
   <div class="fgrp"><label>Plaka <span class="req">*</span></label><input type="text" id="aPlaka" placeholder="34 ABC 123"></div>
-  <div class="fgrp"><label>Araç Tipi</label><select id="aTip"><option>Sedan</option><option>Minivan</option><option>Minibüs</option><option>Midibüs</option><option>Otobüs</option><option>SUV</option><option>VIP</option></select></div>
+  <div class="fgrp"><label>Araç Tipi</label><select id="aTip"><option>Vito</option><option>Sprinter</option><option>Sedan</option><option>Minivan</option><option>Minibüs</option><option>Midibüs</option><option>Otobüs</option><option>SUV</option><option>VIP</option></select></div>
   <div class="fgrp"><label>Kapasite (kişi)</label><input type="number" id="aKap"></div>
   <div class="fgrp"><label>Yıl</label><input type="text" id="aYil" placeholder="2022"></div>
   <div class="fgrp"><label>Renk</label><input type="text" id="aRenk" placeholder="Siyah"></div>
@@ -878,7 +878,7 @@ function formatTarih(t){
 }
 
 var opUcretGorunsun=false;
-function normGuz(s){if(!s)return '-';return s.replace(/ISTANBUL HAVAALANI/gi,'IST').replace(/İSTANBUL HAVAALANI/gi,'IST').replace(/SABİHA GÖKÇEN HAVAALANI/gi,'SAW');}
+function normGuz(s){if(!s)return '-';return s.replace(/ISTANBUL HAVAALANI/gi,'IST').replace(/İSTANBUL HAVAALANI/gi,'IST').replace(/SABİHA GÖKÇEN HAVAALANI/gi,'SAW').replace(/SABIHA GOKCEN HAVAALANI/gi,'SAW').replace(/SABİHA GÖKÇEN/gi,'SAW').replace(/SABIHA GOKCEN/gi,'SAW').replace(/SAW HAVAALANI/gi,'SAW');}
 function formatTarih(t){if(!t||t==='-')return '-';var p=String(t).split('-');if(p.length===3)return p[2]+'.'+p[1]+'.'+p[0];return t;}
 var SU='https://jgrhhsxfdoqvhiiwglow.supabase.co';
 var SK='sb_publishable_GEaH7sDlIB8OWYydFTOfeA_CKQKcICd';
@@ -1024,6 +1024,7 @@ function renderDash(){
       '<td style="white-space:nowrap;">'+isTipi+'</td>'+
       '<td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+g+'">'+g+'</td>'+
       (o.ucus_kodu?'<td style="font-size:11px;color:var(--pr);">'+o.ucus_kodu+'</td>':'<td style="color:var(--t4);">-</td>')+
+      '<td>'+(o.arac_tip||'-')+'</td>'+
       '<td>'+aracHtml+'</td>'+
       '<td style="white-space:nowrap;">'+
         '<button class="btn btno btnxs" onclick="opDetay('+o.id+')" style="margin-right:3px;">Detay</button>'+
@@ -1033,7 +1034,7 @@ function renderDash(){
   });
   w.innerHTML='<div style="overflow-x:auto;"><table><thead><tr>'+
     '<th>Durum</th><th>Tarih</th><th>Saat</th><th>Müşteri</th>'+
-    '<th>İş Tipi</th><th>Güzergah</th><th>Uçuş K.</th><th>Araç</th><th></th>'+
+    '<th>İş Tipi</th><th>Güzergah</th><th>Uçuş K.</th><th>Araç Tipi</th><th>Plaka</th><th></th>'+
     '</tr></thead><tbody>'+rows+'</tbody></table></div>';
 }
 
@@ -1104,13 +1105,41 @@ function takvimNavigate(yon){
 }
 
 function takvimGunTikla(tarih){
-  var gunOps=OP.filter(function(o){return o.bas_tarih===tarih;});
+  var gunOps=OP.filter(function(o){return o.bas_tarih===tarih;}).sort(function(a,b){
+    var ta=a.bas_saat||'00:00',tb=b.bas_saat||'00:00';return ta<tb?-1:ta>tb?1:0;
+  });
   if(!gunOps.length)return;
-  var m=gunOps.map(function(o){
+  var p=document.getElementById('mo-takvim-gun');
+  if(!p){
+    p=document.createElement('div');p.id='mo-takvim-gun';p.className='mo';
+    p.innerHTML='<div class="modal" style="max-width:480px;max-height:85vh;overflow-y:auto;">'
+      +'<div class="mh"><div class="mt2" id="takvimGunBaslik"></div><button class="mc2" onclick="cM('takvim-gun')">&#10005;</button></div>'
+      +'<div id="takvimGunIcerik" style="padding:8px 16px 16px;"></div>'
+      +'</div>';
+    document.body.appendChild(p);
+  }
+  var ay=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  var d=new Date(tarih);
+  document.getElementById('takvimGunBaslik').textContent='📅 '+d.getDate()+' '+ay[d.getMonth()]+' — '+gunOps.length+' İş';
+  var html='';
+  gunOps.forEach(function(o){
     var mu=MS.find(function(x){return x.id===o.musteri_id;});
-    return (mu?mu.ad:'?')+' - '+(o.tur||'')+' '+( o.bas_saat||'');
-  }).join('\n');
-  alert(tarih+' tarihinde '+gunOps.length+' iş:\n'+m);
+    var isTipi=o.tur||'-';
+    if(isTipi==='Gelis'||isTipi==='GL')isTipi='Geliş';
+    else if(isTipi==='Gidis'||isTipi==='GD')isTipi='Gidiş';
+    var g=normGuz([o.bas_yer,o.bit_yer].filter(Boolean).join(' > '))||'-';
+    html+='<div onclick="cM('takvim-gun');opDetay('+o.id+')" style="cursor:pointer;border:1px solid var(--bd);border-radius:10px;padding:10px 14px;margin-bottom:8px;transition:background .1s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'
+      +'<span style="font-weight:700;font-size:13px;">'+(o.bas_saat?o.bas_saat.slice(0,5):'--:--')+'</span>'
+      +'<span style="font-size:11px;background:#eff6ff;color:#2563eb;padding:2px 8px;border-radius:12px;">'+isTipi+'</span>'
+      +'</div>'
+      +'<div style="font-size:13px;color:var(--t2);margin-bottom:3px;">🏢 '+(mu?mu.ad:'?')+'</div>'
+      +'<div style="font-size:12px;color:var(--t3);">📍 '+g+'</div>'
+      +(o.arac_tip?'<div style="font-size:11px;color:var(--t3);margin-top:2px;">🚗 '+o.arac_tip+'</div>':'')
+      +'</div>';
+  });
+  document.getElementById('takvimGunIcerik').innerHTML=html;
+  oM('takvim-gun');
 }
 
 function navTalep(){
@@ -1133,7 +1162,7 @@ function renderOps(){
   var list=OP.slice().sort(function(a,b){
     var ta=(a.bas_tarih||'0000')+'T'+(a.bas_saat||'00:00');
     var tb=(b.bas_tarih||'0000')+'T'+(b.bas_saat||'00:00');
-    return ta>tb?-1:ta<tb?1:0;
+    if(ta>tb)return -1;if(ta<tb)return 1;return 0;
   }).filter(function(o){
     var m=MS.find(function(x){return x.id===o.musteri_id;});
     var mA=m?m.ad.toLowerCase():'';
@@ -1814,8 +1843,8 @@ async function silM(id){if(!confirm('Silinsin mi?'))return;await sc.from('muster
 // TAŞERON
 async function kaydetT(){
   var ad=gv('tAd').trim();if(!ad){toast('Ad zorunlu!','err');return;}
-  await sc.from('takas_firmalar').insert({ad:ad,telefon:gv('tTel'),email:gv('tEmail'),arac_bilgisi:gv('tArac'),odeme_sekli:gv('tOd'),notlar:gv('tNot')});
-  toast('Takas Firması eklendi!','ok');cM('takas_firma');['tAd','tTel','tEmail','tArac','tNot'].forEach(function(id){sv(id,'');});await lT();renderTas();
+  await sc.from('takas_firmalar').insert({ad:ad,yetkili:gv('tYetkili'),telefon:gv('tTel'),email:gv('tEmail'),odeme_sekli:gv('tOd'),notlar:gv('tNot')});
+  toast('Takas Firması eklendi!','ok');cM('takas_firma');['tAd','tYetkili','tTel','tEmail','tNot'].forEach(function(id){sv(id,'');});await lT();renderTas();
 }
 function renderTas(){
   var w=document.getElementById('tasW');
@@ -1855,7 +1884,8 @@ async function silT(id){if(!confirm('Silinsin mi?'))return;await sc.from('takas_
 async function kaydetArac(){
   var model=gv('aModel').trim();if(!model){toast('Model zorunlu!','err');return;}
   var surId=parseInt(gv('aSur'))||null;
-  await sc.from('araclar').insert({model:model,plaka:gv('aPlaka'),tip:gv('aTip'),kapasite:parseInt(gv('aKap'))||null,yil:gv('aYil'),renk:gv('aRenk'),surucu_id:surId,notlar:gv('aNot')});
+  var r=await sc.from('araclar').insert({model:model,plaka:gv('aPlaka'),tip:gv('aTip'),kapasite:parseInt(gv('aKap'))||null,yil:gv('aYil'),renk:gv('aRenk'),surucu_id:surId,notlar:gv('aNot')}).select();
+  if(r.error){toast('Hata: '+r.error.message,'err');return;}
   toast('Araç eklendi!','ok');cM('arac');['aModel','aPlaka','aKap','aYil','aRenk','aNot'].forEach(function(id){sv(id,'');});await lA();renderArac();
 }
 function renderArac(){
