@@ -14,7 +14,7 @@ function ucretGir(opId){
   sc.from('operasyonlar').update({fiyat:ucret}).eq('id',opId).then(function(r){
     if(r.error){toast('Hata!','err');return;}
     toast('Ücret kaydedildi!','ok');
-    loadAll().then(function(){renderOps();renderDash();});
+    loadAll().then(function(){renderOps();renderDash();if(typeof renderCari==='function')renderCari();if(typeof renderMust==='function')renderMust();});
   });
 }
 
@@ -156,22 +156,23 @@ async function opSecilenleriSil(){
   var ids=[];document.querySelectorAll('.opChk:checked').forEach(function(c){ids.push(parseInt(c.value));});
   if(!ids.length){toast('Seçili kayıt yok','err');return;}
   if(!confirm(ids.length+' operasyonu silmek istediğinize emin misiniz?'))return;
+  await sc.from('cari_hareketler').delete().in('operasyon_id',ids);
+  await sc.from('yolcular').delete().in('operasyon_id',ids);
   var r=await sc.from('operasyonlar').delete().in('id',ids);
   if(r.error){toast('Silme hatası: '+r.error.message,'err');return;}
   toast(ids.length+' operasyon silindi','ok');
   await loadAll();renderOps();renderDash();
 }
-async function opSecilenleriDurumDegistir(){
+function opSecilenleriDurumDegistir(ev){
   var ids=[];document.querySelectorAll('.opChk:checked').forEach(function(c){ids.push(parseInt(c.value));});
   if(!ids.length){toast('Seçili kayıt yok','err');return;}
-  var durum=prompt('Yeni durum (Rezervasyon / Yola Çıktı / Tamamlandı / İptal):');
-  if(!durum)return;
-  var gecerli=['Rezervasyon','Yola Çıktı','Tamamlandı','İptal','Talep'];
-  if(!gecerli.includes(durum)){toast('Geçersiz durum!','err');return;}
-  var r=await sc.from('operasyonlar').update({durum:durum}).in('id',ids);
-  if(r.error){toast('Güncelleme hatası: '+r.error.message,'err');return;}
-  toast(ids.length+' operasyon güncellendi','ok');
-  await loadAll();renderOps();renderDash();
+  durumMenuGoster(ev,null,async function(d){
+    if(!confirm(ids.length+' operasyon "'+d+'" yapılsın mı?'))return;
+    if(await durumDegistir(ids,d)){
+      toast(ids.length+' operasyon → '+d,'ok');
+      var ca=document.getElementById('chkAll');if(ca)ca.checked=false;opSecimGuncelle();
+    }
+  });
 }
 
 
@@ -511,7 +512,7 @@ input::placeholder{color:var(--t4);}
       <!-- Seçim bar -->
       <div id="opSecimBar" style="display:none;background:#1e3a5f;color:#fff;border-radius:8px;padding:8px 14px;margin-bottom:8px;align-items:center;gap:10px;">
         <span><b id="opSecimSayi">0</b> kayıt seçildi</span>
-        <button onclick="opSecilenleriDurumDegistir()" style="background:#f59e0b;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;font-weight:600;">Durum Değiştir</button>
+        <button onclick="opSecilenleriDurumDegistir(event)" style="background:#f59e0b;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;font-weight:600;">Durum Değiştir</button>
         <button onclick="opSecilenleriSil()" style="background:#dc2626;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;font-weight:600;">Sil</button>
       </div>
       <!-- Üst aksiyon satırı -->
@@ -525,6 +526,7 @@ input::placeholder{color:var(--t4);}
         </div>
         <input type="text" id="oSrc" placeholder="&#128269; Ara..." style="width:200px;" oninput="renderOps()">
       </div>
+      <div id="opDurumSekme" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>
       <!-- Sütun filtreleri - tablo başlıklarıyla hizalı -->
       <div class="card" style="padding:0;overflow:hidden;">
         <div style="overflow-x:auto;">
@@ -945,7 +947,45 @@ function navYeni(){
 
 async function loadAll(){
   await Promise.all([lM(),lT(),lA(),lS(),lO(),lC()]);
+  await musteriCariEsitle();
   renderDash();renderTakvim();
+}
+
+// Operasyon ücretlerini müşteri carisindeki borç kayıtlarıyla eşitler.
+// Kural: ücreti olan ve iptal edilmemiş her operasyon için tek bir borç kaydı olur.
+// Sadece fark varsa veritabanına yazar.
+var _cariEsitleniyor=false;
+async function musteriCariEsitle(opIds){
+  if(_cariEsitleniyor)return;
+  _cariEsitleniyor=true;
+  try{
+    var hedef=opIds?OP.filter(function(o){return opIds.indexOf(o.id)>-1;}):OP;
+    var ekle=[],guncelle=[],sil=[];
+    hedef.forEach(function(o){
+      var kayitlar=CH.filter(function(x){return x.tip==='musteri'&&x.islem_tip==='borc'&&x.operasyon_id===o.id;});
+      var tutar=parseFloat(o.fiyat)||0;
+      var olmali=tutar>0&&o.durum!=='İptal'&&o.musteri_id;
+      if(!olmali){kayitlar.forEach(function(x){sil.push(x.id);});return;}
+      if(!kayitlar.length){
+        ekle.push({tip:'musteri',hedef_id:o.musteri_id,islem_tip:'borc',tutar:tutar,tarih:o.bas_tarih||null,
+          aciklama:'Op: '+(o.tur||'')+' '+(o.bas_yer||'')+'>'+(o.bit_yer||''),operasyon_id:o.id});
+        return;
+      }
+      var k=kayitlar[0];
+      kayitlar.slice(1).forEach(function(x){sil.push(x.id);});
+      if(parseFloat(k.tutar)!==tutar||k.hedef_id!==o.musteri_id||(k.tarih||null)!==(o.bas_tarih||null))
+        guncelle.push({id:k.id,tutar:tutar,hedef_id:o.musteri_id,tarih:o.bas_tarih||null});
+    });
+    if(!ekle.length&&!guncelle.length&&!sil.length)return;
+    if(ekle.length){var r1=await sc.from('cari_hareketler').insert(ekle);if(r1.error)console.warn('Cari ekleme:',r1.error.message);}
+    for(var i=0;i<guncelle.length;i++){
+      var g=guncelle[i];
+      var r2=await sc.from('cari_hareketler').update({tutar:g.tutar,hedef_id:g.hedef_id,tarih:g.tarih}).eq('id',g.id);
+      if(r2.error)console.warn('Cari güncelleme:',r2.error.message);
+    }
+    if(sil.length){var r3=await sc.from('cari_hareketler').delete().in('id',sil);if(r3.error)console.warn('Cari silme:',r3.error.message);}
+    await lC();
+  }finally{_cariEsitleniyor=false;}
 }
 async function lM(){var r=await sc.from('musteriler').select('*').order('olusturma',{ascending:false});MS=r.data||[];}
 async function lT(){var r=await sc.from('takas_firmalar').select('*').order('olusturma',{ascending:false});TS=r.data||[];}
@@ -1014,9 +1054,8 @@ function renderDash(){
     else if(isTipi==='Gidis'||isTipi==='GD')isTipi='Gidiş';
     var aracHtml=o.arac_plaka?('<div class="pc" style="font-size:11px;">'+o.arac_plaka+'</div>'):'<span class="aab" onclick="openAA('+o.id+')">Araç Ata</span>';
     rows+='<tr>'+
-      '<td>'+dBadge(o.durum)+'</td>'+
-      '<td style="font-size:11px;color:var(--t3);white-space:nowrap;">'+(o.kod||'-')+'</td>'+
-      '<td style="white-space:nowrap;">'+formatTarih(o.bas_tarih)+'</td>'+
+      '<td>'+dBadgeTik(o)+'</td>'+
+      '<td style="white-space:nowrap;">'+formatTarih(o.bas_tarih)+(o.kod?'<div style="font-size:10px;color:var(--t4);">'+o.kod+'</div>':'')+'</td>'+
       '<td style="color:var(--t3);white-space:nowrap;">'+(o.bas_saat?o.bas_saat.slice(0,5):'-')+'</td>'+
       '<td><div class="pc">'+(m?m.ad:'?')+'</div></td>'+
       '<td style="white-space:nowrap;">'+isTipi+'</td>'+
@@ -1157,6 +1196,7 @@ function renderOps(){
   var df=gv('oFD');var af=gv('oFA');
   var ft1=gv('oFT1');var ft2=gv('oFT2');
   var fm=gv('oFM');var fit=gv('oFIT');var fat=gv('oFAT');
+  var sayac={'':0};
   var list=OP.slice().sort(function(a,b){
     var ta=(a.bas_tarih||'0000')+'T'+(a.bas_saat||'00:00');
     var tb=(b.bas_tarih||'0000')+'T'+(b.bas_saat||'00:00');
@@ -1176,8 +1216,11 @@ function renderOps(){
     var mfm=!fm||String(o.musteri_id)===fm;
     var mfit=!fit||isTipi===fit;
     var mfat=!fat||(o.arac_tip||'').toLowerCase()===fat.toLowerCase();
-    return ms&&md&&ma&&mt1&&mt2&&mfm&&mfit&&mfat;
+    var dig=ms&&ma&&mt1&&mt2&&mfm&&mfit&&mfat;
+    if(dig){sayac['']++;sayac[o.durum]=(sayac[o.durum]||0)+1;}
+    return dig&&md;
   });
+  opSekmeCiz(sayac,df);
   var w=document.getElementById('oWBody');
   if(!w){
     // oWBody yoksa eski oW'a yaz
@@ -1221,9 +1264,8 @@ function renderOps(){
     }
     rows+='<tr>'+
       '<td><input type="checkbox" class="opChk" value="'+o.id+'" onchange="opSecimGuncelle()"></td>'+
-      '<td>'+dBadge(o.durum)+'</td>'+
-      '<td style="font-size:11px;color:var(--t3);white-space:nowrap;">'+(o.kod||'-')+'</td>'+
-      '<td style="white-space:nowrap;">'+formatTarih(o.bas_tarih)+'</td>'+
+      '<td>'+dBadgeTik(o)+'</td>'+
+      '<td style="white-space:nowrap;">'+formatTarih(o.bas_tarih)+(o.kod?'<div style="font-size:10px;color:var(--t4);">'+o.kod+'</div>':'')+'</td>'+
       '<td style="color:var(--t3);white-space:nowrap;">'+(o.bas_saat?o.bas_saat.slice(0,5):'-')+'</td>'+
       '<td><div class="pc">'+(m?m.ad:'?')+'</div></td>'+
       '<td style="white-space:nowrap;">'+isTipi+'</td>'+
@@ -1249,9 +1291,7 @@ function opFiltreSifirla(){
 
 async function talepOnayla(id){
   if(!confirm('Bu talebi operasyona dönüştürmek istiyor musunuz?'))return;
-  await sc.from('operasyonlar').update({durum:'Rezervasyon'}).eq('id',id);
-  toast('Talep onaylandı → Rezervasyon yapıldı!','ok');
-  await loadAll();renderOps();renderDash();renderTakvim();
+  if(await durumDegistir([id],'Rezervasyon','Talep onaylandı'))toast('Talep onaylandı → Rezervasyon yapıldı!','ok');
 }
 
 // DURUM GÜNCELLE
@@ -1265,12 +1305,77 @@ function openDurum(opId){
   oM('durum');
 }
 
-async function durumKaydet(){
-  var yeniDurum=gv('durumSec');
-  await sc.from('operasyonlar').update({durum:yeniDurum}).eq('id',durumOpId);
-  toast('Durum güncellendi!','ok');cM('durum');
-  await lO();renderOps();renderDash();renderTakvim();
+var DURUMLAR=['Talep','Rezervasyon','Yola Çıktı','Tamamlandı','İptal'];
+function escH(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+// Tüm durum değişiklikleri buradan geçer: günceller + geçmişe yazar
+async function durumDegistir(ids,yeni,not){
+  var eski={};
+  ids.forEach(function(id){var o=OP.find(function(x){return x.id===id;});eski[id]=o?o.durum:null;});
+  var r=await sc.from('operasyonlar').update({durum:yeni}).in('id',ids);
+  if(r.error){toast('Durum güncellenemedi: '+r.error.message,'err');return false;}
+  var kayit=ids.filter(function(id){return eski[id]!==yeni||not;}).map(function(id){
+    return {operasyon_id:id,eski_durum:eski[id],yeni_durum:yeni,not_metni:not||null};
+  });
+  if(kayit.length){
+    try{var g=await sc.from('durum_gecmis').insert(kayit);if(g.error)console.warn('Durum geçmişi yazılamadı:',g.error.message);}
+    catch(e){console.warn('Durum geçmişi yazılamadı:',e);}
+  }
+  ids.forEach(function(id){var o=OP.find(function(x){return x.id===id;});if(o)o.durum=yeni;});
+  await musteriCariEsitle(ids);
+  if(typeof renderCari==='function')renderCari();if(typeof renderMust==='function')renderMust();
+  renderOps();renderDash();if(typeof renderTakvim==='function')renderTakvim();
+  return true;
 }
+
+async function durumKaydet(){
+  var ok=await durumDegistir([durumOpId],gv('durumSec'),(gv('durumNot')||'').trim());
+  if(ok){toast('Durum güncellendi!','ok');cM('durum');}
+}
+
+// Açılır durum menüsü (rozet ve toplu işlem için ortak)
+var _dmCb=null;
+function durumMenuKapat(){var m=document.getElementById('durumMenu');if(m)m.remove();_dmCb=null;}
+function durumMenuTik(d){var cb=_dmCb;durumMenuKapat();if(cb)cb(d);}
+function durumMenuGoster(ev,aktif,cb,ekHtml){
+  ev.stopPropagation();durumMenuKapat();_dmCb=cb;
+  var m=document.createElement('div');m.id='durumMenu';
+  m.style.cssText='position:fixed;z-index:9999;background:#fff;border:1px solid var(--bd);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.15);padding:4px;min-width:160px;';
+  m.onclick=function(e){e.stopPropagation();};
+  m.innerHTML=DURUMLAR.map(function(d){
+    var a=d===aktif;
+    return '<div onclick="durumMenuTik(\''+d+'\')" style="padding:7px 10px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;'+(a?'background:#f1f5f9;':'')+'" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\''+(a?'#f1f5f9':'')+'\'">'+dBadge(d)+(a?'<span style="color:var(--t3);font-size:12px;">✓</span>':'')+'</div>';
+  }).join('')+(ekHtml||'');
+  document.body.appendChild(m);
+  var r=ev.currentTarget.getBoundingClientRect();
+  var top=r.bottom+4;if(top+m.offsetHeight>window.innerHeight-8)top=Math.max(8,r.top-m.offsetHeight-4);
+  m.style.top=top+'px';m.style.left=Math.max(8,Math.min(r.left,window.innerWidth-m.offsetWidth-8))+'px';
+}
+document.addEventListener('click',durumMenuKapat);
+window.addEventListener('scroll',function(){durumMenuKapat();},true);
+
+function dBadgeTik(o){
+  return '<span style="cursor:pointer;white-space:nowrap;" title="Durumu değiştir" onclick="durumMenuAc(event,'+o.id+')">'+dBadge(o.durum)+'<span style="font-size:9px;color:var(--t4);margin-left:3px;">▼</span></span>';
+}
+function durumMenuAc(ev,id){
+  var o=OP.find(function(x){return x.id===id;});if(!o)return;
+  durumMenuGoster(ev,o.durum,async function(d){
+    if(d===o.durum)return;
+    if(d==='İptal'&&!confirm('Bu operasyon iptal edilsin mi?'))return;
+    if(await durumDegistir([id],d))toast('Durum: '+d,'ok');
+  },'<div onclick="durumMenuKapat();openDurum('+id+')" style="border-top:1px solid var(--bd);margin-top:4px;padding:8px 10px;cursor:pointer;font-size:12px;color:var(--t2);">✎ Notla değiştir…</div>');
+}
+
+// Durum sekmeleri
+function opSekmeCiz(say,aktif){
+  var el=document.getElementById('opDurumSekme');if(!el)return;
+  var renk={'':'#334155','Talep':'var(--pu)','Rezervasyon':'var(--pr)','Yola Çıktı':'var(--or)','Tamamlandı':'var(--gr)','İptal':'var(--rd)'};
+  el.innerHTML=[''].concat(DURUMLAR).map(function(d){
+    var a=d===(aktif||'');var c=renk[d];
+    return '<button onclick="opSekmeSec(\''+d+'\')" style="border:1.5px solid '+(a?c:'var(--bd)')+';background:'+(a?c:'#fff')+';color:'+(a?'#fff':'var(--t2)')+';border-radius:20px;padding:5px 13px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">'+(d||'Tümü')+' <span style="opacity:.75;margin-left:2px;">'+(say[d]||0)+'</span></button>';
+  }).join('');
+}
+function opSekmeSec(d){sv('oFD',d);renderOps();}
 
 // ARAÇ TİP
 function secAT(tip,el){
@@ -1375,6 +1480,18 @@ async function opDetay(id){
   b4.onclick = function(){ cM('detay'); opSil(id); };
   db1.appendChild(b4);
   oM('detay');
+  window._detayId=id;
+  sc.from('durum_gecmis').select('*').eq('operasyon_id',id).order('created_at',{ascending:false}).then(function(r){
+    if(window._detayId!==id||r.error||!r.data||!r.data.length)return;
+    var html='<div style="margin-top:16px;border-top:1px solid var(--bd);padding-top:12px;"><div class="csil" style="margin-bottom:8px;">Durum Geçmişi</div>'+
+      r.data.map(function(g){
+        var t=new Date(g.created_at).toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+        return '<div style="display:flex;gap:10px;font-size:12px;margin-bottom:8px;"><span style="color:var(--t3);white-space:nowrap;">'+t+'</span><div>'+
+          (g.eski_durum?dBadge(g.eski_durum)+' → ':'')+dBadge(g.yeni_durum)+
+          (g.not_metni?'<div style="color:var(--t2);margin-top:3px;">'+escH(g.not_metni)+'</div>':'')+'</div></div>';
+      }).join('')+'</div>';
+    document.getElementById('detayIc').insertAdjacentHTML('beforeend',html);
+  });
 }
 
 async function opDuz(id){
